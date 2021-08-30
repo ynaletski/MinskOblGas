@@ -1,0 +1,10 @@
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\Database reader for MinskOblGas.exe.config
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\Database reader for MinskOblGas.exe
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\Database reader for MinskOblGas.pdb
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.AssemblyReference.cache
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database_reader_for_MinskOblGas.DatabaseReader.resources
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database_reader_for_MinskOblGas.Properties.Resources.resources
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.GenerateResource.cache
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.CoreCompileInputs.cache
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.exe
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.pdb
