@@ -8,3 +8,12 @@ C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database 
 C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.CoreCompileInputs.cache
 C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.exe
 C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.pdb
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\EntityFramework.dll
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\System.Data.SQLite.dll
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\EntityFramework.xml
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\System.Data.SQLite.xml
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.CopyComplete
