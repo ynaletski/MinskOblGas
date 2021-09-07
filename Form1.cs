@@ -7,21 +7,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
 using System.Data.SQLite;
+using System.Runtime.InteropServices;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Database_reader_for_MinskOblGas
 {
     public partial class DatabaseReader : Form
     {
+        Excel.Application excelApp;
+
         public DatabaseReader()
         {
             InitializeComponent();
             comboBoxObject.SelectedIndex = 0;
-            comboBoxSensorNumber.SelectedIndex = 0;
 
             //для устранения dataerror
             GridForViewData.DataError += new DataGridViewDataErrorEventHandler(GridforViewData_DataError);
+
+            GridForViewData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         }
 //**********************************************************************************************
 //**********************************************************************************************
@@ -31,15 +35,36 @@ namespace Database_reader_for_MinskOblGas
                                 "Стародороги","Столбцы","ТП_Березин","Узда","Червень" };
 //**********************************************************************************************
 //**********************************************************************************************
+        string[] belongOfObjects = { "Березинскому РГС","Бобровичскому РГС","ПУ Борисовгаз","Вилейскому РГС",
+                                        "Воложинскому РГС","ПУ Дзержинскгаз","Клецкому РГС","Княгининскому ГНС",
+                                        "Копыльскому РГС","Крупскому РГС","Логойскому РГС","Любаньскому РГС",
+                                        "Минскому РПУ","ПУ Молодечногаз","Мядельскому РГС","Несвижскому РГС",
+                                        "Пуховичскому РГС","Руденскому ГНС","ПУ Слуцкгаз","СмолевичиСмолевичскому РГС",
+                                        "ПУ Солигорскгаз","Стародорожскому РГС","ПУ Столбцыгаз","ТП Березинское",
+                                        "Узденскому РГС","Червенскому РГС" };
+//**********************************************************************************************
+//**********************************************************************************************
         private void DatabaseReader_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
             this.MinimumSize = new Size(600, 790);
-        }
-//**********************************************************************************************
-//**********************************************************************************************
-        private void buttonProtocol_Click(object sender, EventArgs e)
-        {
+
+            try
+            {
+                excelApp = new Excel.Application();
+            }
+            catch (Exception error)
+            {
+                labelErrorDescription.Text = error.Message;
+            }
+            if (excelApp == null)
+            {
+                PrintErrors(Errors.ExcelDisabled);
+            }
+            else
+            {
+                PrintErrors(Errors.ExcelEnabled);
+            }
         }
 //**********************************************************************************************
 //**********************************************************************************************
@@ -216,7 +241,7 @@ namespace Database_reader_for_MinskOblGas
                     return;
                 }
                 PrintErrors(Errors.Empty);
-                ConnectionAndFillingGridView(query);
+                ConnectionAndFillingGridView(query);             
             }
         }
 //**********************************************************************************************
@@ -236,6 +261,7 @@ namespace Database_reader_for_MinskOblGas
                 PrintErrors(Errors.EmptyTable);
             }
             else labelErrorDescription.Text += " Количество поверенных манометров: " + dt.Rows.Count.ToString();
+            addItemForComboBoxSensorNumber();
         }
 //**********************************************************************************************
 //**********************************************************************************************
@@ -249,6 +275,13 @@ namespace Database_reader_for_MinskOblGas
             EmptyTable,
             ScalePeriodHalfMonth,
             ScalePeriodYear,
+            ExcelEnabled,
+            ExcelDisabled,
+            ComboBoxSensorNumberIsEmpty,
+            WrongDataInValue_Re,
+            WrongDataInValue_Izm,
+            WrongDataInDate,
+            WrongDataInColumsOfTable,
         }
         private void PrintErrors(Errors errors)
         {
@@ -278,6 +311,28 @@ namespace Database_reader_for_MinskOblGas
                 case Errors.ScalePeriodYear:
                     labelErrorDescription.Text = "Настройка диапазона времени не должна превышать 500 дней (1 год 5 месяцев)";
                     break;
+                case Errors.ExcelEnabled:
+                    labelExistExcel.Text = "Excel установлен на ПК";
+                    labelExistExcel.ForeColor = System.Drawing.Color.Green;
+                    break;
+                case Errors.ExcelDisabled:
+                    labelErrorDescription.Text = "Excel не установлен на ПК";
+                    break;
+                case Errors.ComboBoxSensorNumberIsEmpty:
+                    labelErrorDescription.Text = "Для получения протокола или сертификата необходимо сформировать таблицу";
+                    break;
+                case Errors.WrongDataInValue_Re:
+                    labelErrorDescription.Text = "Некорректные данные в столбце Value_Re по выбранному манометру";
+                    break;
+                case Errors.WrongDataInValue_Izm:
+                    labelErrorDescription.Text = "Некорректные данные в столбце Value_Izm по выбранному манометру";
+                    break;
+                case Errors.WrongDataInDate:
+                    labelErrorDescription.Text = "Некорректные данные в столбце Date по выбранному манометру";
+                    break;
+                case Errors.WrongDataInColumsOfTable:
+                    labelErrorDescription.Text = "Некорректные данные в выбраной строке";
+                    break;
             }
         }
 //**********************************************************************************************
@@ -296,16 +351,20 @@ namespace Database_reader_for_MinskOblGas
         }
 //**********************************************************************************************
 //**********************************************************************************************
+
         private void GridforViewData_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             PrintErrors(Errors.DataBase);
         }
-//**********************************************************************************************
-//**********************************************************************************************
-        private void GridForViewData_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
 
+//**********************************************************************************************
+//**********************************************************************************************
+
+        private void GridForViewData_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            comboBoxSensorNumber.SelectedIndex = e.RowIndex;
         }
+
 //**********************************************************************************************
 //**********************************************************************************************
         private void checkBoxData_CheckedChanged(object sender, EventArgs e)
@@ -326,5 +385,469 @@ namespace Database_reader_for_MinskOblGas
         }
 //**********************************************************************************************
 //**********************************************************************************************
+
+        private void comboBoxSensorNumber_SelectedIndexChanged(object sender, EventArgs e) 
+        {
+            GridForViewData.ClearSelection();
+            GridForViewData.Rows[comboBoxSensorNumber.SelectedIndex].Selected = true;
+            GridForViewData.CurrentCell = GridForViewData[0, comboBoxSensorNumber.SelectedIndex];
+
+        }
+
+//**********************************************************************************************
+//**********************************************************************************************
+        private void addItemForComboBoxSensorNumber()
+        {
+            if (GridForViewData.RowCount > 1)
+            {
+                comboBoxSensorNumber.Items.Clear();
+                for (int i = 0; i < GridForViewData.RowCount - 1; i++)
+                {               
+                    if (GridForViewData.Columns.Count == 13)
+                    {
+                        comboBoxSensorNumber.Items.Add(GridForViewData[0, i].Value);
+                    }
+                    else
+                    {
+                        comboBoxSensorNumber.Items.Add(GridForViewData[1, i].Value);
+                    }
+                    comboBoxSensorNumber.SelectedIndex = 0;
+                }
+            }
+            else
+            {
+                comboBoxSensorNumber.Items.Clear();
+                comboBoxSensorNumber.Text = "";
+            }
+        }
+//**********************************************************************************************
+//**********************************************************************************************
+
+        private void buttonProtocol_Click(object sender, EventArgs e)
+        {
+            protocolPopulate();
+        }
+
+//**********************************************************************************************
+//**********************************************************************************************
+
+        private void buttonSertificate_Click(object sender, EventArgs e)
+        {
+            SertrficatePopulate();
+        }
+
+//**********************************************************************************************
+//**********************************************************************************************
+
+        private enum ColumnsTable : int
+        {
+            Number,
+            Date,
+            Diap,
+            Diam,
+            Clas,
+            Red,
+            Points,
+            Values_Re,
+            Values_Izm,
+            T_ext,
+            P_ext,
+            DevCfg,
+            Smth,
+        }
+//----------------------------------------------
+        private void protocolPopulate()
+        {
+            if(checkValueInGridView() == 1) { }
+            else
+            {
+                excelApp.Visible = true;
+                Excel.Workbooks excelAppWorkBooks = excelApp.Workbooks;
+                string fileName = System.Windows.Forms.Application.StartupPath + "//" + "Без имени 1.ods";
+                try
+                {
+                    excelApp.DisplayAlerts = false;
+                    excelApp.Workbooks.Close();
+                    excelApp.Workbooks.Open(fileName, Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                              Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                              Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                              Type.Missing, Type.Missing);
+                }
+                catch(Exception error)
+                {
+                    labelErrorDescription.Text = error.Message;
+                    return;
+
+                }
+                Excel.Workbook excelAppWorkBook = excelAppWorkBooks[1];
+                Excel.Sheets excelSheets = excelAppWorkBook.Worksheets;
+                Excel.Worksheet excelWorkSheet = (Excel.Worksheet)excelSheets.get_Item(1);
+
+                prepareValueForProtocol(excelWorkSheet, GridForViewData, comboBoxSensorNumber, belongOfObjects, objects, comboBoxObject);
+            }
+        }
+
+//**********************************************************************************************
+//**********************************************************************************************
+
+        private void SertrficatePopulate()
+        {
+            //System.Diagnostics.Process.Start(@"Без имени 2.ods");
+
+            if (checkValueInGridView() == 1) { }
+            else
+            {
+                excelApp.Visible = true;
+                Excel.Workbooks excelAppWorkBooks = excelApp.Workbooks;
+                string fileName = System.Windows.Forms.Application.StartupPath + "//" + "Без имени 2.ods";
+                try
+                {
+                    excelApp.DisplayAlerts = false;
+                    excelApp.Workbooks.Close();
+                    excelApp.Workbooks.Open(fileName, Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                              Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                              Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                              Type.Missing, Type.Missing);
+                }
+                catch (Exception error)
+                {
+                    labelErrorDescription.Text = error.Message;
+                    return;
+
+                }
+                Excel.Workbook excelAppWorkBook = excelAppWorkBooks[1];
+                Excel.Sheets excelSheets = excelAppWorkBook.Worksheets;
+                Excel.Worksheet excelWorkSheet = (Excel.Worksheet)excelSheets.get_Item(1);
+
+                prepareValueForSertificate(excelWorkSheet, GridForViewData, comboBoxSensorNumber, belongOfObjects, objects, comboBoxObject);
+            }
+        }
+        //**********************************************************************************************
+        //**********************************************************************************************
+        private void prepareValueForProtocol(Excel.Worksheet worksheet, DataGridView gridView, ComboBox comboboxSensor, string[] belongOfObjects, string[] objects, ComboBox comboboxObject)
+        {
+            string smth, number, clas, date, t_exp, diam, diap, belongOfObject = "";
+            string[] datas_re, datas_izm;
+
+            if (gridView.Columns.Count == 13)
+            {
+                smth = gridView[((int)ColumnsTable.Smth), comboboxSensor.SelectedIndex].Value.ToString();
+                number = gridView[((int)ColumnsTable.Number), comboboxSensor.SelectedIndex].Value.ToString();
+                clas = gridView[((int)ColumnsTable.Clas), comboboxSensor.SelectedIndex].Value.ToString();
+                date = gridView[((int)ColumnsTable.Date), comboboxSensor.SelectedIndex].Value.ToString();
+                t_exp = gridView[((int)ColumnsTable.T_ext), comboboxSensor.SelectedIndex].Value.ToString();
+                diam = gridView[((int)ColumnsTable.Diam), comboboxSensor.SelectedIndex].Value.ToString();
+                diap = gridView[((int)ColumnsTable.Diap), comboboxSensor.SelectedIndex].Value.ToString();
+                diap = diap.Remove(diap.Length - 1);
+                datas_re = gridView[((int)ColumnsTable.Values_Re), comboboxSensor.SelectedIndex].Value.ToString().Split('-');
+                datas_izm = gridView[((int)ColumnsTable.Values_Izm), comboboxSensor.SelectedIndex].Value.ToString().Split('-');
+                belongOfObject = belongOfObjects[comboboxObject.SelectedIndex];
+            }
+            else
+            {
+                smth = gridView[((int)ColumnsTable.Smth)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                number = gridView[((int)ColumnsTable.Number)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                clas = gridView[((int)ColumnsTable.Clas)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                date = gridView[((int)ColumnsTable.Date)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                t_exp = gridView[((int)ColumnsTable.T_ext)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                diam = gridView[((int)ColumnsTable.Diam)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                diap = gridView[((int)ColumnsTable.Diap)+1, comboboxSensor.SelectedIndex].Value.ToString();
+                diap = diap.Remove(diap.Length - 1);
+                datas_re = gridView[((int)ColumnsTable.Values_Re)+1, comboboxSensor.SelectedIndex].Value.ToString().Split('-');
+                datas_izm = gridView[((int)ColumnsTable.Values_Izm)+1, comboboxSensor.SelectedIndex].Value.ToString().Split('-');
+                int i = 0;
+                foreach (string itemObjects in objects)
+                {
+                    if (gridView[0, comboboxSensor.SelectedIndex].Value.ToString() == itemObjects)
+                    {
+                        belongOfObject = belongOfObjects[i];
+                    }
+                    i++;
+                }
+            }
+            worksheet.Cells[9, 8] = smth;
+            worksheet.Cells[11, 8] = number;
+            worksheet.Cells[12, 8] = clas;
+            worksheet.Cells[15, 6] = date;
+            worksheet.Cells[14, 7] = t_exp;
+            worksheet.Cells[11, 6] = diam;
+            worksheet.Cells[13, 6] = belongOfObject;
+            worksheet.Cells[12, 6] = diap;
+            worksheet.Cells[27, 3] = datas_re[0];
+            worksheet.Cells[28, 3] = datas_re[1];
+            worksheet.Cells[29, 3] = datas_re[2];
+            worksheet.Cells[30, 3] = datas_re[3];
+            worksheet.Cells[29, 4] = datas_re[4];
+            worksheet.Cells[28, 4] = datas_re[5];
+            worksheet.Cells[27, 4] = datas_re[6];
+            worksheet.Cells[27, 5] = datas_izm[0];
+            worksheet.Cells[28, 5] = datas_izm[1];
+            worksheet.Cells[29, 5] = datas_izm[2];
+            worksheet.Cells[30, 5] = datas_izm[3];
+            worksheet.Cells[29, 6] = datas_izm[4];
+            worksheet.Cells[28, 6] = datas_izm[5];
+            worksheet.Cells[27, 6] = datas_izm[6];
+        }
+        //**********************************************************************************************
+        //**********************************************************************************************
+
+        private void prepareValueForSertificate(Excel.Worksheet worksheet, DataGridView gridView, ComboBox comboboxSensor, string[] belongOfObjects, string[] objects, ComboBox comboboxObjects)
+        {
+            string smth, number, clas, date, dateLast, diam, diap, belongOfObject = "";
+
+            if (gridView.Columns.Count == 13)
+            {
+                smth = gridView[((int)ColumnsTable.Smth), comboboxSensor.SelectedIndex].Value.ToString();
+                date = gridView[((int)ColumnsTable.Date), comboboxSensor.SelectedIndex].Value.ToString();
+                dateLast = Convert.ToDateTime(gridView[((int)ColumnsTable.Date), comboboxSensor.SelectedIndex].Value.ToString()).AddYears(1).ToString("dd.MM.yy");
+                number = gridView[((int)ColumnsTable.Number), comboboxSensor.SelectedIndex].Value.ToString();
+                clas = gridView[((int)ColumnsTable.Clas), comboboxSensor.SelectedIndex].Value.ToString();
+                diam = gridView[((int)ColumnsTable.Diam), comboboxSensor.SelectedIndex].Value.ToString();
+                diap = gridView[((int)ColumnsTable.Diap), comboboxSensor.SelectedIndex].Value.ToString();
+                diap = diap.Remove(diap.Length - 1);
+                belongOfObject = belongOfObjects[comboboxObjects.SelectedIndex];
+
+                worksheet.Cells[12, 8] = smth;
+                worksheet.Cells[15, 5] = date;
+                worksheet.Cells[19, 5] = number;
+                worksheet.Cells[25, 5] = clas;
+                worksheet.Cells[21, 5] = diam;
+                worksheet.Cells[16, 5] = dateLast;
+                worksheet.Cells[23, 5] = diap;
+                worksheet.Cells[27, 5] = belongOfObject;
+            }
+            else
+            {
+                smth = gridView[((int)ColumnsTable.Smth) + 1, comboboxSensor.SelectedIndex].Value.ToString();
+                date = gridView[((int)ColumnsTable.Date) + 1, comboboxSensor.SelectedIndex].Value.ToString();
+                dateLast = Convert.ToDateTime(gridView[((int)ColumnsTable.Date) + 1, comboboxSensor.SelectedIndex].Value.ToString()).AddYears(1).ToString("dd.MM.yy");
+                number = gridView[((int)ColumnsTable.Number) + 1, comboboxSensor.SelectedIndex].Value.ToString();
+                clas = gridView[((int)ColumnsTable.Clas) + 1, comboboxSensor.SelectedIndex].Value.ToString();
+                diam = gridView[((int)ColumnsTable.Diam) + 1, comboboxSensor.SelectedIndex].Value.ToString();
+                diap = gridView[((int)ColumnsTable.Diap) + 1, comboboxSensor.SelectedIndex].Value.ToString();
+                diap = diap.Remove(diap.Length - 1);
+                int i = 0;
+                foreach (string itemObjects in objects)
+                {
+                    if (gridView[0, comboboxSensor.SelectedIndex].Value.ToString() == itemObjects)
+                    {
+                        belongOfObject = belongOfObjects[i];
+                    }
+                    i++;
+                }
+
+                worksheet.Cells[12, 8] = smth;
+                worksheet.Cells[15, 5] = date;
+                worksheet.Cells[19, 5] = number;
+                worksheet.Cells[25, 5] = clas;
+                worksheet.Cells[21, 5] = diam;
+                worksheet.Cells[16, 5] = dateLast;
+                worksheet.Cells[23, 5] = diap;
+                worksheet.Cells[27, 5] = belongOfObject;
+            }
+        }
+        //**********************************************************************************************
+        //**********************************************************************************************
+
+        private int checkValueInGridView()
+        {
+
+            try
+            {
+                if (GridForViewData.Columns.Count == 13)
+                {
+                    DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString());
+                }
+                else
+                {
+                    DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString());
+                }
+
+            }
+            catch
+            {
+                PrintErrors(Errors.WrongDataInDate);
+                return 1;
+            }
+            if (comboBoxSensorNumber.Items.Count == 0)
+            {
+                PrintErrors(Errors.ComboBoxSensorNumberIsEmpty);
+                return 1;
+            }
+            else if (GridForViewData[((int)ColumnsTable.Values_Re), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
+            {
+                PrintErrors(Errors.WrongDataInValue_Re);
+                return 1;
+            }
+            else if (GridForViewData[((int)ColumnsTable.Values_Izm), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
+            {
+                PrintErrors(Errors.WrongDataInValue_Izm);
+                return 1;
+            }
+            else if (GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                        || GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                        || GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                        || GridForViewData[((int)ColumnsTable.T_ext), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                        || GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                        || GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString() == "")
+            {
+                PrintErrors(Errors.WrongDataInColumsOfTable);
+                return 1;
+            }
+            else return 0;
+        }
+
+
+
+
     }
 }
+
+
+
+
+
+
+//protocol
+/*if (GridForViewData.Columns.Count == 13)
+{
+    excelWorkSheet.Cells[9, 8] = GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[11, 8] = GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[15, 6] = GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[14, 7] = GridForViewData[((int)ColumnsTable.T_ext), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[11, 6] = GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+
+    string dataDiap = GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
+    excelWorkSheet.Cells[12, 6] = dataDiap;
+
+    string[] datas_Re = GridForViewData[((int)ColumnsTable.Values_Re), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
+    if (datas_Re.Length == 8)
+    {
+        excelWorkSheet.Cells[27, 3] = datas_Re[0];
+        excelWorkSheet.Cells[28, 3] = datas_Re[1];
+        excelWorkSheet.Cells[29, 3] = datas_Re[2];
+        excelWorkSheet.Cells[30, 3] = datas_Re[3];
+        excelWorkSheet.Cells[29, 4] = datas_Re[4];
+        excelWorkSheet.Cells[28, 4] = datas_Re[5];
+        excelWorkSheet.Cells[27, 4] = datas_Re[6];
+    }
+    else PrintErrors(Errors.WrongDataInValue_Re);
+
+    string[] datas_Izm = GridForViewData[((int)ColumnsTable.Values_Izm), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
+    if (datas_Izm.Length == 8)
+    {
+        excelWorkSheet.Cells[27, 5] = datas_Izm[0];
+        excelWorkSheet.Cells[28, 5] = datas_Izm[1];
+        excelWorkSheet.Cells[29, 5] = datas_Izm[2];
+        excelWorkSheet.Cells[30, 5] = datas_Izm[3];
+        excelWorkSheet.Cells[29, 6] = datas_Izm[4];
+        excelWorkSheet.Cells[28, 6] = datas_Izm[5];
+        excelWorkSheet.Cells[27, 6] = datas_Izm[6];
+    }
+    else PrintErrors(Errors.WrongDataInValue_Izm);
+
+    excelWorkSheet.Cells[13, 6] = belongOfObjects[comboBoxObject.SelectedIndex];
+}
+else
+{
+    excelWorkSheet.Cells[9, 8] = GridForViewData[((int)ColumnsTable.Smth)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[11, 8] = GridForViewData[((int)ColumnsTable.Number)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Clas)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[15, 6] = GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[14, 7] = GridForViewData[((int)ColumnsTable.T_ext) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[11, 6] = GridForViewData[((int)ColumnsTable.Diam) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+
+    string dataDiap = GridForViewData[((int)ColumnsTable.Diap)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
+    excelWorkSheet.Cells[12, 6] = dataDiap;
+
+    string[] datas_Re = GridForViewData[((int)ColumnsTable.Values_Re) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
+    if (datas_Re.Length == 8)
+    {
+        excelWorkSheet.Cells[27, 3] = datas_Re[0];
+        excelWorkSheet.Cells[28, 3] = datas_Re[1];
+        excelWorkSheet.Cells[29, 3] = datas_Re[2];
+        excelWorkSheet.Cells[30, 3] = datas_Re[3];
+        excelWorkSheet.Cells[29, 4] = datas_Re[4];
+        excelWorkSheet.Cells[28, 4] = datas_Re[5];
+        excelWorkSheet.Cells[27, 4] = datas_Re[6];
+    }
+    else PrintErrors(Errors.WrongDataInValue_Re);
+
+    string[] datas_Izm = GridForViewData[((int)ColumnsTable.Values_Izm) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
+    if (datas_Izm.Length == 8)
+    {
+        excelWorkSheet.Cells[27, 5] = datas_Izm[0];
+        excelWorkSheet.Cells[28, 5] = datas_Izm[1];
+        excelWorkSheet.Cells[29, 5] = datas_Izm[2];
+        excelWorkSheet.Cells[30, 5] = datas_Izm[3];
+        excelWorkSheet.Cells[29, 6] = datas_Izm[4];
+        excelWorkSheet.Cells[28, 6] = datas_Izm[5];
+        excelWorkSheet.Cells[27, 6] = datas_Izm[6];
+    }
+    else PrintErrors(Errors.WrongDataInValue_Izm);
+
+    int i = 0;
+    foreach(string itemObjects in objects)
+    {
+        if(GridForViewData[ 0 , comboBoxSensorNumber.SelectedIndex].Value.ToString() == itemObjects)
+        {
+            excelWorkSheet.Cells[13, 6] = belongOfObjects[i];
+        }
+        i++;
+    }
+
+}*/
+
+
+
+
+
+
+
+//certificate
+/*
+if (GridForViewData.Columns.Count == 13)
+{
+    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[15, 5] = GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[19, 5] = GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[25, 5] = GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[21, 5] = GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+
+    DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString());
+    excelWorkSheet.Cells[16, 5] = dt.AddYears(1).ToString("dd.MM.yy");
+
+    string dataDiap = GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
+    excelWorkSheet.Cells[23, 5] = dataDiap;
+
+    excelWorkSheet.Cells[27, 5] = belongOfObjects[comboBoxObject.SelectedIndex];
+}
+else
+{
+    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Smth) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[15, 5] = GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[19, 5] = GridForViewData[((int)ColumnsTable.Number) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[25, 5] = GridForViewData[((int)ColumnsTable.Clas) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    excelWorkSheet.Cells[21, 5] = GridForViewData[((int)ColumnsTable.Diam) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+
+    DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString());
+    excelWorkSheet.Cells[16, 5] = dt.AddYears(1).ToString("dd.MM.yy");
+
+    string dataDiap = GridForViewData[((int)ColumnsTable.Diap) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
+    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
+    excelWorkSheet.Cells[23, 5] = dataDiap;
+
+    int i = 0;
+    foreach (string itemObjects in objects)
+    {
+        if (GridForViewData[0, comboBoxSensorNumber.SelectedIndex].Value.ToString() == itemObjects)
+        {
+            excelWorkSheet.Cells[27, 5] = belongOfObjects[i];
+        }
+        i++;
+    }
+}*/

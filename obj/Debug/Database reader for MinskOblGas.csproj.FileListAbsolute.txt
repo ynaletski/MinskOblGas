@@ -17,3 +17,4 @@ C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\EntityFra
 C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\EntityFramework.SqlServer.xml
 C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\bin\Debug\System.Data.SQLite.xml
 C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.CopyComplete
+C:\Users\Yauhen\source\repos\Database reader for MinskOblGas\obj\Debug\Database reader for MinskOblGas.csproj.ResolveComReference.cache

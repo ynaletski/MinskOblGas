@@ -55,7 +55,6 @@ namespace Database_reader_for_MinskOblGas
             this.comboBoxSensorNumber = new System.Windows.Forms.ComboBox();
             this.labelError = new System.Windows.Forms.Label();
             this.labelErrorDescription = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.GridForViewData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.settings)).BeginInit();
             this.settings.Panel1.SuspendLayout();
@@ -76,12 +75,15 @@ namespace Database_reader_for_MinskOblGas
             this.GridForViewData.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.GridForViewData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.GridForViewData.Location = new System.Drawing.Point(309, 55);
+            this.GridForViewData.MultiSelect = false;
             this.GridForViewData.Name = "GridForViewData";
             this.GridForViewData.ReadOnly = true;
             this.GridForViewData.RowHeadersWidth = 30;
+            this.GridForViewData.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.GridForViewData.Size = new System.Drawing.Size(847, 682);
             this.GridForViewData.TabIndex = 0;
-            this.GridForViewData.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GridForViewData_CellContentClick);
+            this.GridForViewData.VirtualMode = true;
+            this.GridForViewData.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GridForViewData_CellClick);
             // 
             // labelExistExcel
             // 
@@ -278,7 +280,7 @@ namespace Database_reader_for_MinskOblGas
             "Борисов",
             "Вилейка",
             "Воложин",
-            "Держинск",
+            "Дзержинск",
             "Клецк",
             "Княгинин",
             "Копыль",
@@ -329,6 +331,7 @@ namespace Database_reader_for_MinskOblGas
             this.buttonSertificate.TabIndex = 13;
             this.buttonSertificate.Text = "Свидетельство";
             this.buttonSertificate.UseVisualStyleBackColor = false;
+            this.buttonSertificate.Click += new System.EventHandler(this.buttonSertificate_Click);
             // 
             // buttonProtocol
             // 
@@ -378,16 +381,15 @@ namespace Database_reader_for_MinskOblGas
             // 
             // comboBoxSensorNumber
             // 
-            this.comboBoxSensorNumber.DisplayMember = "павпав";
+            this.comboBoxSensorNumber.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxSensorNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.comboBoxSensorNumber.FormattingEnabled = true;
-            this.comboBoxSensorNumber.Items.AddRange(new object[] {
-            "NULL"});
             this.comboBoxSensorNumber.Location = new System.Drawing.Point(12, 25);
             this.comboBoxSensorNumber.Name = "comboBoxSensorNumber";
             this.comboBoxSensorNumber.Size = new System.Drawing.Size(159, 24);
             this.comboBoxSensorNumber.TabIndex = 1;
             this.comboBoxSensorNumber.Tag = "";
+            this.comboBoxSensorNumber.SelectedIndexChanged += new System.EventHandler(this.comboBoxSensorNumber_SelectedIndexChanged);
             // 
             // labelError
             // 
@@ -409,22 +411,12 @@ namespace Database_reader_for_MinskOblGas
             this.labelErrorDescription.TabIndex = 5;
             this.labelErrorDescription.Text = "Отсутствуют";
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(23, 6);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 11;
-            this.label1.Text = "label1";
-            // 
             // DatabaseReader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(1184, 761);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.labelErrorDescription);
             this.Controls.Add(this.labelError);
             this.Controls.Add(this.settings);
@@ -478,7 +470,6 @@ namespace Database_reader_for_MinskOblGas
         private System.Windows.Forms.Button buttonTable;
         private System.Windows.Forms.Label labelError;
         private System.Windows.Forms.Label labelErrorDescription;
-        private System.Windows.Forms.Label label1;
     }
 }
 
