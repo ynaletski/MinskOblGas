@@ -55,6 +55,8 @@ namespace Database_reader_for_MinskOblGas
             this.comboBoxSensorNumber = new System.Windows.Forms.ComboBox();
             this.labelError = new System.Windows.Forms.Label();
             this.labelErrorDescription = new System.Windows.Forms.Label();
+            this.labelDbName = new System.Windows.Forms.Label();
+            this.textBoxDbName = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.GridForViewData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.settings)).BeginInit();
             this.settings.Panel1.SuspendLayout();
@@ -104,6 +106,8 @@ namespace Database_reader_for_MinskOblGas
             // settings.Panel1
             // 
             this.settings.Panel1.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.settings.Panel1.Controls.Add(this.textBoxDbName);
+            this.settings.Panel1.Controls.Add(this.labelDbName);
             this.settings.Panel1.Controls.Add(this.buttonTable);
             this.settings.Panel1.Controls.Add(this.checkBoxPeriod);
             this.settings.Panel1.Controls.Add(this.checkBoxData);
@@ -411,6 +415,25 @@ namespace Database_reader_for_MinskOblGas
             this.labelErrorDescription.TabIndex = 5;
             this.labelErrorDescription.Text = "Отсутствуют";
             // 
+            // labelDbName
+            // 
+            this.labelDbName.AutoSize = true;
+            this.labelDbName.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.labelDbName.Location = new System.Drawing.Point(139, 12);
+            this.labelDbName.Name = "labelDbName";
+            this.labelDbName.Size = new System.Drawing.Size(76, 17);
+            this.labelDbName.TabIndex = 11;
+            this.labelDbName.Text = "Имя базы:";
+            // 
+            // textBoxDbName
+            // 
+            this.textBoxDbName.Location = new System.Drawing.Point(142, 32);
+            this.textBoxDbName.Name = "textBoxDbName";
+            this.textBoxDbName.Size = new System.Drawing.Size(101, 20);
+            this.textBoxDbName.TabIndex = 12;
+            this.textBoxDbName.Text = "MOG.sq3";
+            this.textBoxDbName.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // DatabaseReader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -470,6 +493,8 @@ namespace Database_reader_for_MinskOblGas
         private System.Windows.Forms.Button buttonTable;
         private System.Windows.Forms.Label labelError;
         private System.Windows.Forms.Label labelErrorDescription;
+        private System.Windows.Forms.TextBox textBoxDbName;
+        private System.Windows.Forms.Label labelDbName;
     }
 }
 

@@ -177,7 +177,12 @@ namespace Database_reader_for_MinskOblGas
 //**********************************************************************************************
 //**********************************************************************************************
 
-        private void sqlQueryAndFillingGridView()
+        private void sqlQueryAndFillingGridView(CheckBox checkBoxObject, CheckBox checkBoxData, 
+                                                    CheckBox checkBoxPeriod, DataGridView GridForViewData, 
+                                                        ComboBox comboBoxSensorNumber, ComboBox comboBoxObject,
+                                                            Label labelErrorDescription, DateTimePicker dateTime,
+                                                                DateTimePicker dateTimePeriodFrom, DateTimePicker dateTimePeriodTo,
+                                                                        TextBox textBoxDbName)
         {
             string query;
 
@@ -209,7 +214,7 @@ namespace Database_reader_for_MinskOblGas
                     query = QueryForOnlyObject(comboBoxObject.Text);
                 }
                 PrintErrors(Errors.Empty);
-                ConnectionAndFillingGridView(query);
+                ConnectionAndFillingGridView(query, GridForViewData, comboBoxSensorNumber, labelErrorDescription, textBoxDbName);
             }
             else
             {
@@ -241,16 +246,16 @@ namespace Database_reader_for_MinskOblGas
                     return;
                 }
                 PrintErrors(Errors.Empty);
-                ConnectionAndFillingGridView(query);             
+                ConnectionAndFillingGridView(query, GridForViewData, comboBoxSensorNumber, labelErrorDescription, textBoxDbName);             
             }
         }
 //**********************************************************************************************
 //**********************************************************************************************
-        private void ConnectionAndFillingGridView(string query)
+        private void ConnectionAndFillingGridView(string query, DataGridView GridForViewData, ComboBox comboBoxSensorNumber, Label labelErrorDescription, TextBox textBoxDbName)
         {
             SQLiteConnection connection =
             //new SQLiteConnection(@"data source=D:\программирование\C#\database\MOG.sq3");
-            new SQLiteConnection(@"data source=MOG.sq3"); //в одной папке с программой
+            new SQLiteConnection(@"data source=Db\" + textBoxDbName.Text); //в папке Db/ с программой
             SQLiteCommand cmd = new SQLiteCommand(query, connection);
             SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd);
             DataTable dt = new DataTable();
@@ -261,7 +266,7 @@ namespace Database_reader_for_MinskOblGas
                 PrintErrors(Errors.EmptyTable);
             }
             else labelErrorDescription.Text += " Количество поверенных манометров: " + dt.Rows.Count.ToString();
-            addItemForComboBoxSensorNumber();
+            addItemForComboBoxSensorNumber(GridForViewData, comboBoxSensorNumber);
         }
 //**********************************************************************************************
 //**********************************************************************************************
@@ -341,7 +346,12 @@ namespace Database_reader_for_MinskOblGas
         {
             try
             {
-                sqlQueryAndFillingGridView();
+                sqlQueryAndFillingGridView(checkBoxObject, checkBoxData,
+                                                    checkBoxPeriod, GridForViewData,
+                                                        comboBoxSensorNumber, comboBoxObject,
+                                                            labelErrorDescription, dateTime,
+                                                                dateTimePeriodFrom, dateTimePeriodTo,
+                                                                    textBoxDbName);
             }
             catch (Exception error)
             {
@@ -396,7 +406,7 @@ namespace Database_reader_for_MinskOblGas
 
 //**********************************************************************************************
 //**********************************************************************************************
-        private void addItemForComboBoxSensorNumber()
+        private void addItemForComboBoxSensorNumber(DataGridView GridForViewData, ComboBox comboBoxSensorNumber)
         {
             if (GridForViewData.RowCount > 1)
             {
@@ -425,7 +435,9 @@ namespace Database_reader_for_MinskOblGas
 
         private void buttonProtocol_Click(object sender, EventArgs e)
         {
-            protocolPopulate();
+            protocolPopulate(excelApp, GridForViewData, 
+                                comboBoxSensorNumber, belongOfObjects, objects, 
+                                    comboBoxObject, labelErrorDescription);
         }
 
 //**********************************************************************************************
@@ -433,7 +445,9 @@ namespace Database_reader_for_MinskOblGas
 
         private void buttonSertificate_Click(object sender, EventArgs e)
         {
-            SertrficatePopulate();
+            SertrficatePopulate(excelApp ,GridForViewData, 
+                                    comboBoxSensorNumber, belongOfObjects, objects, 
+                                        comboBoxObject, labelErrorDescription);
         }
 
 //**********************************************************************************************
@@ -456,9 +470,11 @@ namespace Database_reader_for_MinskOblGas
             Smth,
         }
 //----------------------------------------------
-        private void protocolPopulate()
+        private void protocolPopulate(Excel.Application excelApp, DataGridView GridForViewData, 
+                                        ComboBox comboBoxSensorNumber, string[] belongOfObjects, 
+                                            string[] objects, ComboBox comboBoxObject, Label labelErrorDescription)
         {
-            if(checkValueInGridView() == 1) { }
+            if(checkValueInGridView(GridForViewData, comboBoxSensorNumber) == 1) { }
             else
             {
                 excelApp.Visible = true;
@@ -490,11 +506,12 @@ namespace Database_reader_for_MinskOblGas
 //**********************************************************************************************
 //**********************************************************************************************
 
-        private void SertrficatePopulate()
+        private void SertrficatePopulate(Excel.Application excelApp, DataGridView GridForViewData, 
+                                            ComboBox comboBoxSensorNumber, string[] belongOfObjects, 
+                                                string[] objects, ComboBox comboBoxObject, Label labelErrorDescription)
         {
             //System.Diagnostics.Process.Start(@"Без имени 2.ods");
-
-            if (checkValueInGridView() == 1) { }
+            if (checkValueInGridView(GridForViewData, comboBoxSensorNumber) == 1) { }
             else
             {
                 excelApp.Visible = true;
@@ -524,7 +541,9 @@ namespace Database_reader_for_MinskOblGas
         }
         //**********************************************************************************************
         //**********************************************************************************************
-        private void prepareValueForProtocol(Excel.Worksheet worksheet, DataGridView gridView, ComboBox comboboxSensor, string[] belongOfObjects, string[] objects, ComboBox comboboxObject)
+        private void prepareValueForProtocol(Excel.Worksheet worksheet, DataGridView gridView, 
+                                                ComboBox comboboxSensor, string[] belongOfObjects, 
+                                                        string[] objects, ComboBox comboboxObject)
         {
             string smth, number, clas, date, t_exp, diam, diap, belongOfObject = "";
             string[] datas_re, datas_izm;
@@ -591,7 +610,9 @@ namespace Database_reader_for_MinskOblGas
         //**********************************************************************************************
         //**********************************************************************************************
 
-        private void prepareValueForSertificate(Excel.Worksheet worksheet, DataGridView gridView, ComboBox comboboxSensor, string[] belongOfObjects, string[] objects, ComboBox comboboxObjects)
+        private void prepareValueForSertificate(Excel.Worksheet worksheet, DataGridView gridView, 
+                                                    ComboBox comboboxSensor, string[] belongOfObjects, 
+                                                       string[] objects, ComboBox comboboxObjects)
         {
             string smth, number, clas, date, dateLast, diam, diap, belongOfObject = "";
 
@@ -649,205 +670,71 @@ namespace Database_reader_for_MinskOblGas
         //**********************************************************************************************
         //**********************************************************************************************
 
-        private int checkValueInGridView()
+        private int checkValueInGridView(DataGridView GridForViewData, ComboBox comboBoxSensorNumber)
         {
-
+            if (comboBoxSensorNumber.Items.Count == 0)
+            {
+                PrintErrors(Errors.ComboBoxSensorNumberIsEmpty);
+                return 1;
+            }
             try
             {
                 if (GridForViewData.Columns.Count == 13)
                 {
                     DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString());
+                    if (GridForViewData[((int)ColumnsTable.Values_Re), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
+                    {
+                        PrintErrors(Errors.WrongDataInValue_Re);
+                        return 1;
+                    }
+                    else if (GridForViewData[((int)ColumnsTable.Values_Izm), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
+                    {
+                        PrintErrors(Errors.WrongDataInValue_Izm);
+                        return 1;
+                    }
+                    else if (GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.T_ext), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString() == "")
+                    {
+                        PrintErrors(Errors.WrongDataInColumsOfTable);
+                        return 1;
+                    }
+                    else return 0;
                 }
                 else
                 {
                     DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString());
+                    if (GridForViewData[((int)ColumnsTable.Values_Re) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
+                    {
+                        PrintErrors(Errors.WrongDataInValue_Re);
+                        return 1;
+                    }
+                    else if (GridForViewData[((int)ColumnsTable.Values_Izm) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
+                    {
+                        PrintErrors(Errors.WrongDataInValue_Izm);
+                        return 1;
+                    }
+                    else if (GridForViewData[((int)ColumnsTable.Smth) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Number) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Clas) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.T_ext) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Diam) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
+                                || GridForViewData[((int)ColumnsTable.Diap) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString() == "")
+                    {
+                        PrintErrors(Errors.WrongDataInColumsOfTable);
+                        return 1;
+                    }
+                    else return 0;
                 }
-
             }
             catch
             {
                 PrintErrors(Errors.WrongDataInDate);
                 return 1;
             }
-            if (comboBoxSensorNumber.Items.Count == 0)
-            {
-                PrintErrors(Errors.ComboBoxSensorNumberIsEmpty);
-                return 1;
-            }
-            else if (GridForViewData[((int)ColumnsTable.Values_Re), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
-            {
-                PrintErrors(Errors.WrongDataInValue_Re);
-                return 1;
-            }
-            else if (GridForViewData[((int)ColumnsTable.Values_Izm), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-').Length != 8)
-            {
-                PrintErrors(Errors.WrongDataInValue_Izm);
-                return 1;
-            }
-            else if (GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
-                        || GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
-                        || GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
-                        || GridForViewData[((int)ColumnsTable.T_ext), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
-                        || GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString() == ""
-                        || GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString() == "")
-            {
-                PrintErrors(Errors.WrongDataInColumsOfTable);
-                return 1;
-            }
-            else return 0;
         }
-
-
-
-
     }
 }
-
-
-
-
-
-
-//protocol
-/*if (GridForViewData.Columns.Count == 13)
-{
-    excelWorkSheet.Cells[9, 8] = GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[11, 8] = GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[15, 6] = GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[14, 7] = GridForViewData[((int)ColumnsTable.T_ext), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[11, 6] = GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-
-    string dataDiap = GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
-    excelWorkSheet.Cells[12, 6] = dataDiap;
-
-    string[] datas_Re = GridForViewData[((int)ColumnsTable.Values_Re), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
-    if (datas_Re.Length == 8)
-    {
-        excelWorkSheet.Cells[27, 3] = datas_Re[0];
-        excelWorkSheet.Cells[28, 3] = datas_Re[1];
-        excelWorkSheet.Cells[29, 3] = datas_Re[2];
-        excelWorkSheet.Cells[30, 3] = datas_Re[3];
-        excelWorkSheet.Cells[29, 4] = datas_Re[4];
-        excelWorkSheet.Cells[28, 4] = datas_Re[5];
-        excelWorkSheet.Cells[27, 4] = datas_Re[6];
-    }
-    else PrintErrors(Errors.WrongDataInValue_Re);
-
-    string[] datas_Izm = GridForViewData[((int)ColumnsTable.Values_Izm), comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
-    if (datas_Izm.Length == 8)
-    {
-        excelWorkSheet.Cells[27, 5] = datas_Izm[0];
-        excelWorkSheet.Cells[28, 5] = datas_Izm[1];
-        excelWorkSheet.Cells[29, 5] = datas_Izm[2];
-        excelWorkSheet.Cells[30, 5] = datas_Izm[3];
-        excelWorkSheet.Cells[29, 6] = datas_Izm[4];
-        excelWorkSheet.Cells[28, 6] = datas_Izm[5];
-        excelWorkSheet.Cells[27, 6] = datas_Izm[6];
-    }
-    else PrintErrors(Errors.WrongDataInValue_Izm);
-
-    excelWorkSheet.Cells[13, 6] = belongOfObjects[comboBoxObject.SelectedIndex];
-}
-else
-{
-    excelWorkSheet.Cells[9, 8] = GridForViewData[((int)ColumnsTable.Smth)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[11, 8] = GridForViewData[((int)ColumnsTable.Number)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Clas)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[15, 6] = GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[14, 7] = GridForViewData[((int)ColumnsTable.T_ext) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[11, 6] = GridForViewData[((int)ColumnsTable.Diam) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-
-    string dataDiap = GridForViewData[((int)ColumnsTable.Diap)+1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
-    excelWorkSheet.Cells[12, 6] = dataDiap;
-
-    string[] datas_Re = GridForViewData[((int)ColumnsTable.Values_Re) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
-    if (datas_Re.Length == 8)
-    {
-        excelWorkSheet.Cells[27, 3] = datas_Re[0];
-        excelWorkSheet.Cells[28, 3] = datas_Re[1];
-        excelWorkSheet.Cells[29, 3] = datas_Re[2];
-        excelWorkSheet.Cells[30, 3] = datas_Re[3];
-        excelWorkSheet.Cells[29, 4] = datas_Re[4];
-        excelWorkSheet.Cells[28, 4] = datas_Re[5];
-        excelWorkSheet.Cells[27, 4] = datas_Re[6];
-    }
-    else PrintErrors(Errors.WrongDataInValue_Re);
-
-    string[] datas_Izm = GridForViewData[((int)ColumnsTable.Values_Izm) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString().Split('-');
-    if (datas_Izm.Length == 8)
-    {
-        excelWorkSheet.Cells[27, 5] = datas_Izm[0];
-        excelWorkSheet.Cells[28, 5] = datas_Izm[1];
-        excelWorkSheet.Cells[29, 5] = datas_Izm[2];
-        excelWorkSheet.Cells[30, 5] = datas_Izm[3];
-        excelWorkSheet.Cells[29, 6] = datas_Izm[4];
-        excelWorkSheet.Cells[28, 6] = datas_Izm[5];
-        excelWorkSheet.Cells[27, 6] = datas_Izm[6];
-    }
-    else PrintErrors(Errors.WrongDataInValue_Izm);
-
-    int i = 0;
-    foreach(string itemObjects in objects)
-    {
-        if(GridForViewData[ 0 , comboBoxSensorNumber.SelectedIndex].Value.ToString() == itemObjects)
-        {
-            excelWorkSheet.Cells[13, 6] = belongOfObjects[i];
-        }
-        i++;
-    }
-
-}*/
-
-
-
-
-
-
-
-//certificate
-/*
-if (GridForViewData.Columns.Count == 13)
-{
-    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Smth), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[15, 5] = GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[19, 5] = GridForViewData[((int)ColumnsTable.Number), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[25, 5] = GridForViewData[((int)ColumnsTable.Clas), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[21, 5] = GridForViewData[((int)ColumnsTable.Diam), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-
-    DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date), comboBoxSensorNumber.SelectedIndex].Value.ToString());
-    excelWorkSheet.Cells[16, 5] = dt.AddYears(1).ToString("dd.MM.yy");
-
-    string dataDiap = GridForViewData[((int)ColumnsTable.Diap), comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
-    excelWorkSheet.Cells[23, 5] = dataDiap;
-
-    excelWorkSheet.Cells[27, 5] = belongOfObjects[comboBoxObject.SelectedIndex];
-}
-else
-{
-    excelWorkSheet.Cells[12, 8] = GridForViewData[((int)ColumnsTable.Smth) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[15, 5] = GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[19, 5] = GridForViewData[((int)ColumnsTable.Number) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[25, 5] = GridForViewData[((int)ColumnsTable.Clas) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    excelWorkSheet.Cells[21, 5] = GridForViewData[((int)ColumnsTable.Diam) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-
-    DateTime dt = Convert.ToDateTime(GridForViewData[((int)ColumnsTable.Date) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString());
-    excelWorkSheet.Cells[16, 5] = dt.AddYears(1).ToString("dd.MM.yy");
-
-    string dataDiap = GridForViewData[((int)ColumnsTable.Diap) + 1, comboBoxSensorNumber.SelectedIndex].Value.ToString();
-    dataDiap = dataDiap.Remove(dataDiap.Length - 1);
-    excelWorkSheet.Cells[23, 5] = dataDiap;
-
-    int i = 0;
-    foreach (string itemObjects in objects)
-    {
-        if (GridForViewData[0, comboBoxSensorNumber.SelectedIndex].Value.ToString() == itemObjects)
-        {
-            excelWorkSheet.Cells[27, 5] = belongOfObjects[i];
-        }
-        i++;
-    }
-}*/
